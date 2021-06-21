@@ -1,0 +1,140 @@
+---
+title: "Instrumento de Coleta de Dados e Estatística Descritiva"
+output: html_notebook
+---
+By danttis
+
+github.com/danttis
+
+--------------------------------------------------------------------------------
+
+Importação do DataBase
+```{r}
+formulario = read.csv("formulario.csv", sep=",", dec=".", stringsAsFactors = T)
+
+```
+
+Renomear colunas para melhor tratamento dos dados
+```{r}
+colnames(formulario) = c("Data","Nome","Idade","Escolaridade","Vantagens","Desvantagens","Media_presencial","Media_ensino_remoto","Satisfacao")
+summary(formulario)
+```
+
+Limpando dados desnecessarios para a analise. 
+```{r}
+new_form = formulario[,3:9]
+summary(new_form)
+hist(new_form$Satisfacao , main = "Nível de Satisfação", xlab = "", ylab = "Frequência")
+```
+
+Corrigindo caracteres não reconhecidos
+```{r}
+summary(new_form)
+levels(new_form$Escolaridade) = c("Fundamental", "Medio", "Superior")
+levels(new_form$Vantagens) = c("Facil acesso ao material", "Horarios flexiveis","Outros","Seguransa e conforto de casa")
+levels(new_form$Desvantagens) = c("Acesso a internet","Dificuldade de compreensao","Diculdade de comunicasao","Outro")
+```
+
+Trabalhando com os dados concertados 
+```{r}
+dados = new_form
+```
+Distribuições de frequencia
+```{r}
+#Variavél quantitativa
+table(dados$Idade)
+
+#variavél qualitativa
+table(dados$Desvantagens)
+```
+Gráficos  para cada tipo de variavél
+Quantitativa Discreta
+```{r}
+barplot(dados$Idade, main = "Idades", col = "red", xlab = "" , ylab = "Idades")
+```
+Quantitativa Continua
+```{r}
+plot(dados$Media_presencial, main = "Médias do Período Presencial", xlab = "Notas", ylab = "", type = "b", col = "red")
+
+```
+Qualitativa ordinal
+```{r}
+library(scales)
+freq = table(dados$Escolaridade)
+pie(freq, main = "Qual nível estuda", labels = c(paste(round(freq*100/sum(freq), 2), "%", sep="")), col = c("#970a00","#1f3b5c","#0f5f02"))
+legend("topright", fill = c("#970a00","#1f3b5c","#0f5f02"), legend = c("Fundamenta", "Médio","Superior"))
+```
+Qualitativa Nominal
+```{r}
+vantagens = table(dados$Vantagens)
+desvantagens = table(dados$Desvantagens)
+par(mfrow=c(1,2.1), mar=c(0,0,0,0), oma=c(0,0,0,0))
+pie(vantagens , main = "", labels = c(paste(round(vantagens*100/sum(vantagens), 2), "%", sep="")), col = c("#970a00","#1f3b5c","#fffbf4","#0f5f02"))
+legend("topleft", fill = c("#970a00","#1f3b5c","#0f5f02","#fffbf4"), legend = c("Fácil acesso ao material", "Horários flexíveis","Segurança e conforto de casa","Outros"), bty = "n", cex = 0.8)
+legend("bottom", col = "white", legend = c("Maior vantagem no ensino remoto"), bty = "n", cex = 0.8)
+pie(desvantagens, main = "", labels = c(paste(round(desvantagens*100/sum(desvantagens), 2), "%", sep="")), col = c("#970a00","#1f3b5c","#0f5f02","#fffbf4"))
+legend("topleft", fill = c("#970a00","#1f3b5c","#0f5f02","#fffbf4"), legend = c("Acesso a internet", "Dificuldade de compreensão","Dificuldade de comunicação","Outros"), bty = "n", cex = 0.8)
+legend("bottomleft", col = "white", legend = c("Maior desvantagem no ensino remoto") , bty = "n",cex=0.8)
+
+```
+
+Análise Bivariada
+```{r}
+notas = c(1:20)
+plot(dados$Media_presencial, main = "Médias do Período Presencial x Remoto", xlab = "", ylab = "Notas", type = "b", col = "red")
+lines(notas, dados$Media_ensino_remoto,col = "blue", type = "b")
+legend("bottomleft", legend=c("Médias no periodo presencial", "Médias no periodo remoto"),col=c("red", "blue"),lty = 1:1,
+  bty = "n",cex=0.8)
+```
+Medidas de Posição
+```{r}
+#Função para obter a moda , fonte: https://www.tutorialspoint.com/r/r_mean_median_mode.htm
+moda <- function(v) {
+   uniqv <- unique(v)
+   uniqv[which.max(tabulate(match(v, uniqv)))]
+}
+```
+
+```{r}
+print("Medidas de Posição")
+cat("Médias", "\n",
+"Idade:",mean(dados$Idade),"\n",
+"Notas Presencial:",mean(dados$Media_presencial),"\n",
+"Notas Ensino Remoto:",mean(dados$Media_ensino_remoto),"\n",
+"Satisfação:",mean(dados$Satisfacao),"\n")
+
+cat("Modas", "\n",
+"Idade:",moda(dados$Idade),"\n",
+"Notas Presencial:",moda(dados$Media_presencial),"\n",
+"Notas Ensino Remoto:",moda(dados$Media_ensino_remoto),"\n",
+"Satisfação:",moda(dados$Satisfacao),"\n")
+
+cat("Medianas", "\n",
+"Idade:",median(dados$Idade),"\n",
+"Notas Presencial:",median(dados$Media_presencial),"\n",
+"Notas Ensino Remoto:",median(dados$Media_ensino_remoto),"\n",
+"Satisfação:",median(dados$Satisfacao),"\n")
+
+cat("Quartis", "\n",
+"Idade:",quantile(dados$Idade),"\n",
+"Notas Presencial:",quantile(dados$Media_presencial),"\n",
+"Notas Ensino Remoto:",quantile(dados$Media_ensino_remoto),"\n",
+"Satisfação:",quantile(dados$Satisfacao),"\n")
+
+```
+
+Medidas de dispersão
+```{r}
+cat("Ampitude:","\n",
+"Idade:",range(dados$Idade),"\n",
+"Notas Presencial:",range(dados$Media_presencial),"\n",
+"Notas Ensino Remoto:",range(dados$Media_ensino_remoto),"\n",
+"Satisfação:",range(dados$Satisfacao),"\n")
+
+cat("Variância:","\n", 
+"Idade:",var(dados$Idade),"\n",
+"Notas Presencial:",var(dados$Media_presencial),"\n",
+"Notas Ensino Remoto:",var(dados$Media_ensino_remoto),"\n",
+"Satisfação:",var(dados$Satisfacao),"\n")
+```
+
